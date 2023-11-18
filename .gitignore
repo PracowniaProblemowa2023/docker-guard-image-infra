@@ -1,0 +1,7 @@
+# Terraform related
+**/.terraform/*
+*.plan
+*.tfplan
+validate.out
+**/*.tfstate
+**/*.tfstate.*
