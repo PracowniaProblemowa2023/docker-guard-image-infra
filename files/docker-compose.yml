@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: aetSSuD2fJm1UV7!
+      POSTGRES_USER: admin
+      POSTGRES_DB: docker
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/docker
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: aetSSuD2fJm1UV7!
+    ports:
+      - 8443:8443
+    volumes:
+      - "/home/adminuser/key.pem:/etc/x509/https/key.pem"
+      - "/home/adminuser/cert.pem:/etc/x509/https/cert.pem"
+    command:
+      - start --hostname=docker-guard.pl --https-certificate-file=/etc/x509/https/cert.pem --https-certificate-key-file=/etc/x509/https/key.pem
+  backend:
+    image: docker-guard-image-backend:1.0.0
+    environment:
+      DB_SCHEMA: public
+      DB_URL: jdbc:postgresql://postgres/docker
+      DB_LOGIN: admin
+      DB_PASSWORD: aetSSuD2fJm1UV7!
+      KEY_CLOAK_ISSUER_URL: https://docker-guard.pl:8443/realms/docker-guard
+    depends_on:
+      - postgres
+      - keycloak
+  frontend:
+    image: docker-guard-image-frontend:1.0.0
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/home/adminuser/key.pem:/etc/x509/https/key.pem"
+      - "/home/adminuser/cert.pem:/etc/x509/https/cert.pem"
+    depends_on:
+      - backend

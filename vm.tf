@@ -53,3 +53,54 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+
+resource "null_resource" "upload_cert" {
+  connection {
+    type = "ssh"
+    user = "adminuser"
+    host = azurerm_public_ip.vm_pip["docker_guard"].ip_address
+    private_key = file("/Users/michalczarnik/.ssh/id_rsa")
+  }
+  provisioner "file" {
+    source = "./files/cert.pem"
+    destination = "/home/adminuser/cert.pem"
+  }
+  lifecycle {
+    replace_triggered_by = [ azurerm_linux_virtual_machine.vm ]
+  }
+  depends_on = [ azurerm_linux_virtual_machine.vm ]
+}
+
+resource "null_resource" "upload_key" {
+  connection {
+    type = "ssh"
+    user = "adminuser"
+    host = azurerm_public_ip.vm_pip["docker_guard"].ip_address
+    private_key = file("/Users/michalczarnik/.ssh/id_rsa")
+  }
+  provisioner "file" {
+    source = "./files/key.pem"
+    destination = "/home/adminuser/key.pem"
+  }
+  lifecycle {
+    replace_triggered_by = [ azurerm_linux_virtual_machine.vm ]
+  }
+  depends_on = [ azurerm_linux_virtual_machine.vm ]
+}
+
+resource "null_resource" "upload_docker_compose" {
+  connection {
+    type = "ssh"
+    user = "adminuser"
+    host = azurerm_public_ip.vm_pip["docker_guard"].ip_address
+    private_key = file("/Users/michalczarnik/.ssh/id_rsa")
+  }
+  provisioner "file" {
+    source = "./files/docker-compose.yml"
+    destination = "/home/adminuser/docker-compose.yml"
+  }
+  lifecycle {
+    replace_triggered_by = [ azurerm_linux_virtual_machine.vm ]
+  }
+  depends_on = [ azurerm_linux_virtual_machine.vm ]
+}
